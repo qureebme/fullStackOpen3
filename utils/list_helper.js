@@ -18,7 +18,6 @@ const mostBlogs = (blogs) => {
         for (let i=0; i < uniqAuthors.length; i++){
             for (let j=0; j < authors.length; j++){
                 if (uniqAuthors[i] == authors[j]) authorCount[i]++
-                console.log('authrCount:', authorCount)
             }
         }
 
@@ -31,8 +30,29 @@ const mostBlogs = (blogs) => {
         }
 }
 
+const mostLikes = (blogs) => {
+    let authors = blogs.map((blog) => blog.author),
+        uniqAuthors = [...new Set(authors)],
+        authorLikes = new Array(uniqAuthors.length).fill(0);
+
+        for (let i=0; i < uniqAuthors.length; i++){
+            for (let j=0; j < authors.length; j++){
+                if (uniqAuthors[i] == authors[j]) authorLikes[i] += blogs[j].likes
+            }
+        }
+
+        let maxIndex = authorLikes.indexOf(Math.max(...authorLikes))
+        let author = uniqAuthors[maxIndex];
+
+        return {
+            author: author,
+            likes: authorLikes[maxIndex]
+        }
+}
+
   module.exports = {
     totalLikes,
     favoriteBlog,
     mostBlogs,
+    mostLikes
   }
