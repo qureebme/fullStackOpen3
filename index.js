@@ -4,7 +4,7 @@ const app = require('./app')
 
 
 
-const PORT = config.port
+const PORT = config.PORT
 http.createServer(app).listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })

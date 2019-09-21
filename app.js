@@ -7,7 +7,7 @@ const mongoose = require('mongoose')
 const blogRouter = require('./controllers/router')
 
 
-const mongoURI = config.mongoURI
+const mongoURI = config.MONGODB_URI
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
         .then(() => console.log('successfully connected to mongodb'))
         .catch((err) => console.log(`CONNECTION ERROR: ${err}`))
