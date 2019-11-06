@@ -22,7 +22,7 @@ describe('api tests', () => {
             results.body.map((item) => {expect(item.id).toBeDefined()})
     })
 
-    test.only('Post request succesfully creates new blog post', async () => {
+    test('Post request succesfully creates new blog post', async () => {
         let blogEntry = {
             title: 'test blog2',
             author: 'tyson gay',
@@ -40,6 +40,18 @@ describe('api tests', () => {
             finalNumber = get2.body.length;
 
         expect(finalNumber).toBe(initialNumber + 1)
+    })
+
+    test.only('If likes prop is missing, default to zero', async () => {
+        let blogEntry = {
+            title: 'test blog2',
+            author: 'tyson gay',
+            url: 'www.2die4.com'
+        }
+        let req = await api.post('/api/blogs')
+                    .send(blogEntry)
+                    .expect(201)
+        expect(req.body.likes).toBe(0)
     })
 })
 
