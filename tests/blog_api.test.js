@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
-const Blog = require('../models/blog')
 
 const api = supertest(app)
 
@@ -13,7 +12,7 @@ describe('api tests', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/)
 
-            expect(results.body.length).toBe(11)
+            expect(results.body.length).toBe(11) // at the time
     })
 
     test('Expect id to be defined', async () => {
@@ -42,7 +41,7 @@ describe('api tests', () => {
         expect(finalNumber).toBe(initialNumber + 1)
     })
 
-    test.only('If likes prop is missing, default to zero', async () => {
+    test('If likes prop is missing, default to zero', async () => {
         let blogEntry = {
             title: 'test blog2',
             author: 'tyson gay',
@@ -52,6 +51,16 @@ describe('api tests', () => {
                     .send(blogEntry)
                     .expect(201)
         expect(req.body.likes).toBe(0)
+    })
+
+    test.only('If title or url is missing, response status is 400', async () => {
+        let blogEntry = {
+            author: 'tyson gay',
+            url: 'www.2die4.com'
+        }
+        let req = await api.post('/api/blogs')
+                            .send(blogEntry)
+                            .expect(400)
     })
 })
 
