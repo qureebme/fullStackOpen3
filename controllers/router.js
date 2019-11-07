@@ -37,4 +37,12 @@ blogRouter.delete('/:id', async (request, response) => {
             .catch((err) => response.status(400).end())
 })
 
+blogRouter.patch('/:id', async (request, response) => {
+  await Blog.updateOne({_id: request.params.id}, request.body)
+            .then((result) => {
+              response.status(200).json({nModified: result.nModified})
+            })
+            .catch((err) => response.status(400).end('No document matched'))
+})
+
 module.exports = blogRouter
