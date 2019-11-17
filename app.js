@@ -13,10 +13,19 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
         .then(() => console.log('successfully connected to mongodb'))
         .catch((err) => console.log(`CONNECTION ERROR: ${err}`))
 
+let middleware = {
+        tokenExtractor: function (request, response, next) {
+                const authorization = request.get('authorization')
+                if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+                        request.token = authorization.substring(7)
+                        }
+                next()
+                }
+        }
         
 app.use(cors())
 app.use(bodyParser.json())
-
+app.use(middleware.tokenExtractor)
 app.use('/api/login', loginRouter)
 app.use('/api/users', userRouter)
 app.use('/api/blogs', blogRouter)
@@ -34,5 +43,5 @@ function errorHandler(err, req, res, next) {
         else if (err.name === 'JsonWebTokenError') {
                 return res.status(401).json({error: 'invalid token'})
                 }
-        else res.status(500).send({error: 'Server error'})
+        else res.status(500).send({error: err.message})
     }

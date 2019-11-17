@@ -16,11 +16,11 @@ blogRouter.get('/', (request, response) => {
   
 blogRouter.post('/', async (request, response, next) => {
     let blog = new Blog(request.body)
-    const token = getTokenFrom(request)
+    //const token = getTokenFrom(request)
 
     try {
-        const decodedToken = jwt.verify(token, config.SECRET)
-        if (!token || !decodedToken.id) {
+        const decodedToken = jwt.verify(request.token, config.SECRET)
+        if (!decodedToken.id) {
         return response.status(401).json({ error: 'token missing or invalid' })
         }
 
@@ -64,12 +64,3 @@ blogRouter.patch('/:id', async (request, response) => {
 })
 
 module.exports = blogRouter
-
-
-function getTokenFrom(request) {
-  const authorization = request.get('authorization')
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    return authorization.substring(7)
-  }
-  return null
-}
