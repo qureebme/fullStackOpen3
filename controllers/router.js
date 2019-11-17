@@ -1,7 +1,9 @@
+const config = require('../utils/config')
 const blogRouter = require('express').Router()
 const Blog = require('../models/blog')
-const users = require('../models/user')
-const mongoose = require('mongoose');
+const Users = require('../models/user')
+const mongoose = require('mongoose')
+const jwt = require('jsonwebtoken')
 
 blogRouter.get('/', (request, response) => {
     Blog
@@ -12,26 +14,37 @@ blogRouter.get('/', (request, response) => {
       })
   })
   
-blogRouter.post('/', async (request, response) => {
+blogRouter.post('/', async (request, response, next) => {
     let blog = new Blog(request.body)
+    const token = getTokenFrom(request)
 
-    if(!blog.url || !blog.title){
-      response.status(400).end()
-      return
+    try {
+        const decodedToken = jwt.verify(token, config.SECRET)
+        if (!token || !decodedToken.id) {
+        return response.status(401).json({ error: 'token missing or invalid' })
+        }
+
+        if(!blog.url || !blog.title){
+          response.status(400).end({error: "url and title must be provided"})
+          return
+        }
+
+        const user = await Users.findById(decodedToken.id)
+
+        if(!blog.likes){
+          blog.likes = 0
+        }
+        blog.user = user._id
+        const savedBlog = await blog.save()
+
+        user.blogs = user.blogs.concat(savedBlog._id)
+        await user.save()
+        
+        response.status(201).json(savedBlog.toJSON())
     }
-    let oneUser = await users.findOne({})
-
-    if(!blog.likes){
-      blog.likes = 0
+    catch(err){
+      next(err)
     }
-    blog.user = oneUser._id
-    const savedBlog = await blog.save()
-
-    oneUser.blogs = oneUser.blogs.concat(savedBlog._id)
-    await oneUser.save()
-    
-    response.status(201).json(savedBlog.toJSON())
-
 })
 
 blogRouter.delete('/:id', async (request, response) => {
@@ -51,3 +64,12 @@ blogRouter.patch('/:id', async (request, response) => {
 })
 
 module.exports = blogRouter
+
+
+function getTokenFrom(request) {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    return authorization.substring(7)
+  }
+  return null
+}

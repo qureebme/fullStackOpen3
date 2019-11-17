@@ -21,11 +21,18 @@ app.use('/api/login', loginRouter)
 app.use('/api/users', userRouter)
 app.use('/api/blogs', blogRouter)
 
-
-const errorHandler = (err, req, res, next) => {
-        if (err.name == "ValidationError") res.status(400).send({error: 'username must be unique'})
-        else res.status(500).send('Server error')
-    }
-
 app.use(errorHandler)
+
 module.exports = app
+
+function errorHandler(err, req, res, next) {
+        if (err.name == "ValidationError") res.status(400).json({error: err.message})
+
+        else if (err.name === 'CastError' && err.kind === 'ObjectId') {
+                return res.status(400).json({error: 'malformatted id'})
+                }
+        else if (err.name === 'JsonWebTokenError') {
+                return res.status(401).json({error: 'invalid token'})
+                }
+        else res.status(500).send({error: 'Server error'})
+    }
