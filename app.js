@@ -20,4 +20,10 @@ app.use('/api/users', userRouter)
 app.use('/api/blogs', blogRouter)
 
 
+const errorHandler = (err, req, res, next) => {
+        if (err.name == "ValidationError") res.status(400).send('username must be unique')
+        else res.status(500).send('Server error')
+    }
+
+app.use(errorHandler)
 module.exports = app
