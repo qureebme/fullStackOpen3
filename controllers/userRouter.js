@@ -8,10 +8,13 @@ userRouter.post('/', async (req, res, next) => {
     try {
         const body = req.body
         if (!body.username || !body.password){
-            return res.status(400).send('username and password must be given')
+            return res.status(400).send({error: 'username and password must be given'})
         }
-        if (!(body.username.length > 2) || !(body.password.length > 2) || !(body.name)){
-            return res.status(400).send('username or password is too short')
+        if (!(body.username.length > 2) || !(body.password.length > 2)){
+            return res.status(400).send({error: 'username or password is too short'})
+        }
+        if (!body.name){
+            return res.status(400).send({error: 'name must be provided'})
         }
         const saltRounds = 10
         const passwordHash = await bcrypt.hash(body.password, saltRounds)
