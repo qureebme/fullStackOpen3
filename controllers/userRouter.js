@@ -1,5 +1,6 @@
 const userRouter = require('express').Router()
 const User = require('../models/user')
+const Blog = require('../models/blog')
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 
@@ -31,6 +32,7 @@ userRouter.post('/', async (req, res, next) => {
 
 userRouter.get('/', async (req, res) => {
     let list = await User.find({})
+                            .populate('blogs', {url: 1, title: 1, author: 1})
     res.status(200).json(list)
 })
 
