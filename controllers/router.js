@@ -16,7 +16,6 @@ blogRouter.get('/', (request, response) => {
   
 blogRouter.post('/', async (request, response, next) => {
     let blog = new Blog(request.body)
-    //const token = getTokenFrom(request)
 
     try {
         const decodedToken = jwt.verify(request.token, config.SECRET)
@@ -47,12 +46,29 @@ blogRouter.post('/', async (request, response, next) => {
     }
 })
 
-blogRouter.delete('/:id', async (request, response) => {
-  await Blog.deleteOne({_id: request.params.id})
+blogRouter.delete('/:id', async (request, response, next) => {
+
+    try{
+      const decodedToken = jwt.verify(request.token, config.SECRET)
+      if (!decodedToken.id) {
+        return response.status(401).json({ error: 'token missing or invalid' })
+        }
+
+      const user = await Users.findById(decodedToken.id)
+      const blog = await Blog.findById({_id: request.params.id})
+
+      if(user.id.toString() === blog.user.toString()) {
+        await Blog.deleteOne({_id: request.params.id})
             .then((result) => {
               response.status(200).json({deletedCount: result.deletedCount})
             })
-            .catch((err) => response.status(400).end())
+      }
+
+      else response.status(403).send({error: 'forbidden request!'})
+    }
+    catch(err){
+      next(err)
+    }
 })
 
 blogRouter.patch('/:id', async (request, response) => {
